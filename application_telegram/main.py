@@ -4,7 +4,7 @@ import asyncio
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from config import BOT_TOKEN
+from config import TELEGRAM_TOKEN
 
 from schedulers.auto_check_expires import auto_check_expires
 
@@ -33,7 +33,7 @@ from handlers.property import property_h, business_h, homes_h
 
 logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher()
 scheduler = AsyncIOScheduler()
 

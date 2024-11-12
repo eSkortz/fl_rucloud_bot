@@ -1,15 +1,10 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
-from aiogram.fsm.state import StatesGroup, State
 from keyboards import only_to_main_k
 from handlers.commands_h import start_command
 
 
 router = Router()
-
-
-class Patterns(StatesGroup):
-    waiting_to_id = State()
 
 
 async def sth_error(message: Message, error_text: str) -> None:
