@@ -8,6 +8,7 @@ from env_reader import app_config
 
 
 SERVER_IP = app_config.SERVER_IP.get_secret_value()
+ETHERPAD_URL = app_config.ETHERPAD_URL.get_secret_value()
 TELEGRAM_TOKEN = app_config.TELEGRAM_TOKEN.get_secret_value()
 DATABASE_LOGIN = app_config.DATABASE_LOGIN.get_secret_value()
 DATABASE_PASSWORD = app_config.DATABASE_PASSWORD.get_secret_value()
