@@ -4,6 +4,7 @@ from pydantic import SecretStr
 
 class AppConfig(BaseSettings):
     SERVER_IP: SecretStr
+    ETHERPAD_URL: SecretStr
     TELEGRAM_TOKEN: SecretStr
     DATABASE_LOGIN: SecretStr
     DATABASE_PASSWORD: SecretStr
