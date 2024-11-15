@@ -17,11 +17,6 @@ def get() -> ReplyKeyboardMarkup:
     )
     builder.row(
         types.InlineKeyboardButton(
-            text="Ограничить круг доступа", callback_data=f"make_security"
-        )
-    )
-    builder.row(
-        types.InlineKeyboardButton(
             text="Удалить файл", callback_data=f"delete_pad"
         )
     )

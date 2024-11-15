@@ -8,7 +8,7 @@ router = Router()
 
 
 @router.callback_query(F.data == "create_pad")
-async def main_menu(callback: CallbackQuery) -> None:
+async def pad_menu (callback: CallbackQuery) -> None:
     await callback.message.delete()
     photo = FSInputFile("src/main.png")
     markup_inline = pad_settings_k.get()
