@@ -32,7 +32,7 @@ def get() -> ReplyKeyboardMarkup:
     builder.row(
         types.InlineKeyboardButton(
             text="Создать совместное рабочее пространство",
-            url="https://etherpad.prosto-web.agency/",
+            callback_data=f"create_pad",
         )
     )
     return builder.as_markup(resize_keyboard=True)

@@ -6,3 +6,4 @@ __pycache__/
 alembic.ini
 temp/
 test.py
+.idea/

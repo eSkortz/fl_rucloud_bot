@@ -9,16 +9,29 @@ import xml.etree.ElementTree as ET
 
 from sqlalchemy.orm import session, sessionmaker
 
-from db.oop.alchemy_di_async import DBWorkerAsync
-from config import engine_async, engine
-from db.orm.schema_public import Users, Groups
+from database.oop.database_worker_async import DatabaseWorkerAsync
+from config import database_engine_async, database_engine
+from database.orm.public_users_model import Users
 
-db_worker = DBWorkerAsync(engine_async)
+db_worker = DatabaseWorkerAsync(database_engine_async)
 
 base_url = 'https://nextcloud.prosto-web.agency'
 admin_username = 'admin'
 admin_password = 'admin'
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=database_engine)
+
+
+async def auto_registration(message: Message) -> None:
+    user_in_db = await db_worker.custom_orm_select(
+        cls_from=Users, where_params=[Users.telegram_id == message.chat.id]
+    )
+
+    if user_in_db == []:
+        data_user = {
+            "telegram_id": message.chat.id,
+            "telegram_name": message.chat.username,
+        }
+        await db_worker.custom_insert(cls_to=Users, data=[data_user])
 
 
 async def get_files_list(nextcloud_login: str, nextcloud_password: str, directory_name='') -> list:
@@ -33,7 +46,8 @@ async def get_files_list(nextcloud_login: str, nextcloud_password: str, director
     }
 
     # Выполняем запрос PROPFIND для получения списка файлов
-    response = requests.request("PROPFIND", url, headers=headers, auth=HTTPBasicAuth(nextcloud_login, nextcloud_password))
+    response = requests.request("PROPFIND", url, headers=headers,
+                                auth=HTTPBasicAuth(nextcloud_login, nextcloud_password))
 
     files = []
 
@@ -63,7 +77,7 @@ async def get_files_list(nextcloud_login: str, nextcloud_password: str, director
                 files.append('dir ' + filename)
             else:
                 files.append(filename)
-            print ("ok")
+            print("ok")
     else:
         print(f"Failed to retrieve files. Status code: {response.status_code}")
         print("Response text:", response.text)
@@ -76,7 +90,8 @@ async def upload_file(nextcloud_login: str, nextcloud_password: str, local_file_
 
     # Открываем файл и выполняем PUT-запрос для его загрузки на сервер
     with open(local_file_path, 'rb') as file:
-        response = requests.put(url + remote_file_name, data=file, auth=HTTPBasicAuth(nextcloud_login, nextcloud_password))
+        response = requests.put(url + remote_file_name, data=file,
+                                auth=HTTPBasicAuth(nextcloud_login, nextcloud_password))
 
     # Проверяем статус ответа
     if response.status_code == 201:
@@ -120,7 +135,7 @@ async def remove_file(nextcloud_login: str, nextcloud_password: str, remote_file
         print("Response text:", response.text)
 
 
-def list_directory(directory_name:str, username: str, password: str):
+def list_directory(directory_name: str, username: str, password: str):
     url = f"{base_url}/remote.php/dav/files/admin/{directory_name}/"
     response = requests.request('PROPFIND', url, auth=HTTPBasicAuth(username, password))
     if response.status_code == 207:
@@ -282,6 +297,7 @@ async def create_group(username: str, password: str, group_name: str) -> None:
         print("Директория успешно создана")
     else:
         print(f"Ошибка при создании директории: {response}")
+
 
 async def change_password(nextcloud_login: str, password: str):
     endpoint = f'{base_url}/ocs/v1.php/cloud/users/{nextcloud_login}/password'
