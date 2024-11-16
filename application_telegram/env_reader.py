@@ -14,9 +14,9 @@ class AppConfig(BaseSettings):
     S3_PUBLIC_KEY: SecretStr
     S3_PRIVATE_KEY: SecretStr
 
-    # class Config:
-    #     env_file = 'temp/.env'
-    #     env_file_encoding = 'utf-8'
+    class Config:
+        env_file = 'temp/.env'
+        env_file_encoding = 'utf-8'
 
 
 app_config = AppConfig()

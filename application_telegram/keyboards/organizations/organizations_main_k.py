@@ -4,9 +4,8 @@ from aiogram import types
 
 from config import engine_async
 from utils.func_utils import group_list, get_rucloud_groups_list
-from db.oop.alchemy_di_async import DBWorkerAsync
 
-db_worker = DBWorkerAsync(engine=engine_async)
+
 
 
 async def get(first_element_index: int, message: Message) -> ReplyKeyboardMarkup:
