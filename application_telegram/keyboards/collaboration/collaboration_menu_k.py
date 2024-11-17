@@ -10,9 +10,7 @@ def get(collaboration_name: str) -> ReplyKeyboardMarkup:
             text="🔗 Сгенерировать QR для доступа",
             callback_data=f"get_qr|{collaboration_name}",
         ),
-    )
-    builder.row(
-        types.InlineKeyboardButton(text="🗑 Удалить файл", callback_data="main_menu")
+        types.InlineKeyboardButton(text="🗑 Удалить файл", callback_data="main_menu"),
     )
     builder.row(
         types.InlineKeyboardButton(
