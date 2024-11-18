@@ -1,6 +1,6 @@
 from database.orm.public_files_model import Files
 from database.orm.public_folders_model import Folders
 from database.orm.public_m2m_files_folders_model import M2M_FilesFolders
-from database.orm.public_m2m_users_files import M2M_UsersFiles
+from database.orm.public_m2m_users_files_model import M2M_UsersFiles
 from database.orm.public_m2m_users_folders_model import M2M_UsersFolders
 from database.orm.public_users_model import Users

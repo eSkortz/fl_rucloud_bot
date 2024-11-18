@@ -23,7 +23,10 @@ class M2M_UsersFiles(Base):
     is_active: Mapped[BoolColumn] = mapped_column(
         index=True, nullable=False, default=True
     )
-    expired_at: Mapped[TimestampWTColumn] = mapped_column(index=True, nullable=False)
+    is_owner: Mapped[BoolColumn] = mapped_column(
+        index=True, nullable=False, default=True
+    )
+    expired_at: Mapped[TimestampWTColumn] = mapped_column(index=True, nullable=True)
     created_at: Mapped[TimestampWTColumn] = mapped_column(
         nullable=False, default=func.now()
     )

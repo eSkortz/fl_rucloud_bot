@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, FSInputFile
 from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
 
-from keyboards.organizations import organizations_main_k
+from keyboards.organizations import organization_menu_k
 from aiogram.enums.parse_mode import ParseMode
 
 
@@ -16,7 +16,7 @@ async def main_menu(callback: CallbackQuery) -> None:
     await callback.message.delete()
     first_element_index = int(callback.data.split("|")[1])
     photo = FSInputFile("src/organizations.png")
-    markup_inline = await organizations_main_k.get(first_element_index, callback.message)
+    markup_inline = await organization_menu_k.get(first_element_index, callback.message)
     await callback.message.answer_photo(
         photo=photo,
         caption="> 📂 Это раздел организаций, из него вы можете попасть в рабочую область любой из ваших организаций\.",
