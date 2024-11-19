@@ -75,7 +75,7 @@ async def shared_ls(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data.startswith("shared_file_menu"))
-async def personal_file_menu(callback: CallbackQuery) -> None:
+async def shared_file_menu(callback: CallbackQuery) -> None:
     current_file_id: int = int(callback.data.split("|")[1])
 
     current_file: Files = await database_worker.custom_orm_select(
