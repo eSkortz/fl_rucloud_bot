@@ -3,19 +3,22 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types
 
 
-def get(collaboration_name: str) -> ReplyKeyboardMarkup:
+from database.orm.public_collaborations_model import Collaborations
+
+
+def get(collaboration: Collaborations) -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         types.InlineKeyboardButton(
             text="🔗 Сгенерировать QR для доступа",
-            callback_data=f"get_qr|{collaboration_name}",
+            callback_data=f"get_qr|{collaboration.id}",
         ),
-        types.InlineKeyboardButton(text="🗑 Удалить файл", callback_data="main_menu"),
+        types.InlineKeyboardButton(
+            text="🗑 Удалить файл",
+            callback_data=f"delete_collaboration|{collaboration.id}",
+        ),
     )
     builder.row(
-        types.InlineKeyboardButton(
-            text="✅ Завершить работу с файлом",
-            callback_data=f"save_collaboration|{collaboration_name}",
-        )
+        types.InlineKeyboardButton(text="🔙 Назад", callback_data=f"collaborations_ls")
     )
     return builder.as_markup(resize_keyboard=True)

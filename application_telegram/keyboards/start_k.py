@@ -20,7 +20,7 @@ def get() -> ReplyKeyboardMarkup:
     )
     builder.row(
         types.InlineKeyboardButton(
-            text="🌐 Rucloud docs", callback_data=f"collaborations_ls|0"
+            text="🌐 Rucloud docs", callback_data=f"collaborations_ls"
         ),
     )
     return builder.as_markup(resize_keyboard=True)

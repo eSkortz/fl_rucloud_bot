@@ -10,24 +10,20 @@ from database.orm._annotations import (
 )
 
 
-class M2M_UsersFolders(Base):
-    __tablename__ = "m2m_users_folders"
+class M2M_OrganizationsFolders(Base):
+    __tablename__ = "m2m_organizations_folders"
     __table_args__ = (
-        UniqueConstraint("user_id", "folder_id"),
-        ForeignKeyConstraint(["user_id"], ["users.id"]),
+        UniqueConstraint("organization_id", "folder_id"),
+        ForeignKeyConstraint(["organization_id"], ["organizations.id"]),
         ForeignKeyConstraint(["folder_id"], ["folders.id"]),
     )
-    id: Mapped[IntegerPrimaryKey] = mapped_column(Sequence("m2m_users_folders_id_seq"))
-    user_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
+    id: Mapped[IntegerPrimaryKey] = mapped_column(
+        Sequence("m2m_organizations_folders_id_seq")
+    )
+    organization_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
     folder_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
     is_root: Mapped[BoolColumn] = mapped_column(
         index=True, nullable=False, default=False
-    )
-    is_owner: Mapped[BoolColumn] = mapped_column(
-        index=True, nullable=False, default=True
-    )
-    expired_at: Mapped[TimestampWTColumn] = mapped_column(
-        index=True, nullable=True, default=None
     )
     created_at: Mapped[TimestampWTColumn] = mapped_column(
         nullable=False, default=func.now()

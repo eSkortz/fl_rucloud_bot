@@ -20,9 +20,7 @@ class Collaborations(Base):
     id: Mapped[IntegerPrimaryKey] = mapped_column(Sequence("collaborations_id_seq"))
     user_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
     name: Mapped[TextColumn] = mapped_column(nullable=False)
-    is_deleted: Mapped[BoolColumn] = mapped_column(
-        index=True, nullable=False, default=False
-    )
+    uuid_name: Mapped[TextColumn] = mapped_column(nullable=False)
     created_at: Mapped[TimestampWTColumn] = mapped_column(
         nullable=True, default=func.now()
     )

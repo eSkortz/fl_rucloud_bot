@@ -22,9 +22,6 @@ async def get(file: Files, fallback_string: str) -> ReplyKeyboardMarkup:
         types.InlineKeyboardButton(
             text="♻️ Заменить файл", callback_data=f"replace_file|{file.id}"
         ),
-        types.InlineKeyboardButton(
-            text="👥 Поделиться файлом", callback_data=f"share_file|{file.id}"
-        ),
     )
     builder.row(
         types.InlineKeyboardButton(
