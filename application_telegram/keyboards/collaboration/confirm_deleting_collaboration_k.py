@@ -10,15 +10,10 @@ def get(collaboration: Collaborations) -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         types.InlineKeyboardButton(
-            text="🔗 Сгенерировать QR для доступа",
-            callback_data=f"get_qr|{collaboration.id}",
+            text="🔙 Назад", callback_data=f"collaboration_menu|{collaboration.id}"
         ),
         types.InlineKeyboardButton(
-            text="🗑 Удалить файл",
-            callback_data=f"delete_collaboration|{collaboration.id}",
+            text="✅ Да", callback_data=f"ok_delete_collaboration|{collaboration.id}"
         ),
-    )
-    builder.row(
-        types.InlineKeyboardButton(text="🔙 Назад", callback_data=f"collaborations_ls")
     )
     return builder.as_markup(resize_keyboard=True)

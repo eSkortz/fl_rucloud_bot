@@ -5,22 +5,23 @@ from database.orm._base_class import Base
 from database.orm._annotations import (
     IntegerPrimaryKey,
     IntegerColumn,
+    BoolColumn,
     TimestampWTColumn,
 )
 
 
-class M2M_UsersOrganizations(Base):
-    __tablename__ = "m2m_users_organizations"
+class M2M_FoldersFolders(Base):
+    __tablename__ = "m2m_folders_folders"
     __table_args__ = (
-        UniqueConstraint("user_id", "organization_id"),
-        ForeignKeyConstraint(["user_id"], ["users.id"]),
-        ForeignKeyConstraint(["organization_id"], ["organizations.id"]),
+        UniqueConstraint("child_folder_id"),
+        ForeignKeyConstraint(["parent_folder_id"], ["folders.id"]),
+        ForeignKeyConstraint(["child_folder_id"], ["folders.id"]),
     )
     id: Mapped[IntegerPrimaryKey] = mapped_column(
-        Sequence("m2m_users_organizations_id_seq")
+        Sequence("m2m_folders_folders_id_seq")
     )
-    user_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
-    organization_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
+    parent_folder_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
+    child_folder_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)
     created_at: Mapped[TimestampWTColumn] = mapped_column(
         nullable=False, default=func.now()
     )

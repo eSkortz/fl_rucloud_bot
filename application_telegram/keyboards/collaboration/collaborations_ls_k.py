@@ -7,26 +7,26 @@ from typing import List
 from config import engine_async
 
 from database.oop.database_worker_async import DatabaseWorkerAsync
-from database.orm.public_organizations_model import Organizations
+from database.orm.public_collaborations_model import Collaborations
 
 
 database_worker = DatabaseWorkerAsync(engine=engine_async)
 
 
-async def get(organizations: List[Organizations]) -> ReplyKeyboardMarkup:
+async def get(collaborations: List[Collaborations]) -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for organization in organizations:
+    for collaboration in collaborations:
         builder.row(
             types.InlineKeyboardButton(
-                text=f"🏣 {organization.name}",
-                callback_data=f"organization_menu|{organization.id}",
+                text=f"📑 {collaboration.name}",
+                callback_data=f"collaboration_menu|{collaboration.id}",
             )
         )
 
     builder.row(
         types.InlineKeyboardButton(
-            text=f"➕ Создать организацию", callback_data=f"create_organization"
+            text=f"➕ Создать область", callback_data=f"create_collaboration"
         )
     )
 
