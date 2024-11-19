@@ -4,16 +4,16 @@ from aiogram.types import Message, FSInputFile
 from aiogram.enums.parse_mode import ParseMode
 
 from keyboards import only_to_main_k
-from keyboards.start import start_k
+from keyboards import start_k
 
-# from utils.func_utils import auto_registration
+from utils.func_utils import auto_registration
 
 router = Router()
 
 
 @router.message(Command("start"))
 async def start_command(message: Message) -> None:
-    # await auto_registration(message)
+    await auto_registration(message)
     markup_inline = start_k.get()
     photo = FSInputFile("src/main.png")
     await message.answer_photo(
@@ -31,6 +31,7 @@ async def start_command(message: Message) -> None:
 
 @router.message(Command("get_id"))
 async def get_id_command(message: Message) -> None:
+    await auto_registration(message)
     markup_inline = only_to_main_k.get()
     await message.answer(
         text=(

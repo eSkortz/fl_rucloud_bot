@@ -23,10 +23,15 @@ class M2M_UsersFolders(Base):
     is_active: Mapped[BoolColumn] = mapped_column(
         index=True, nullable=False, default=True
     )
+    is_root: Mapped[BoolColumn] = mapped_column(
+        index=True, nullable=False, default=False
+    )
     is_owner: Mapped[BoolColumn] = mapped_column(
         index=True, nullable=False, default=True
     )
-    expired_at: Mapped[TimestampWTColumn] = mapped_column(index=True, nullable=True)
+    expired_at: Mapped[TimestampWTColumn] = mapped_column(
+        index=True, nullable=True, default=None
+    )
     created_at: Mapped[TimestampWTColumn] = mapped_column(
         nullable=False, default=func.now()
     )
