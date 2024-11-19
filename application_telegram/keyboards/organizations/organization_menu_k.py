@@ -18,7 +18,8 @@ async def get(organization: Organizations, is_owner: bool) -> ReplyKeyboardMarku
 
     builder.row(
         types.InlineKeyboardButton(
-            text=f"📂 Файлы организации", callback_data=f"create_organization"
+            text=f"📂 Файлы организации",
+            callback_data=f"organization_ls|{organization.id}",
         ),
     )
 

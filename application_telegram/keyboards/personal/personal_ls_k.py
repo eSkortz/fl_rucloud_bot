@@ -47,17 +47,15 @@ async def get(
     if fallback_string != "main_menu":
         builder.row(
             types.InlineKeyboardButton(
-                text="🔙 Назад", callback_data=f"{fallback_string}"
+                text="🗑 Удалить папку",
+                callback_data=f"delete_folder|{current_folder.id}",
             ),
             types.InlineKeyboardButton(
                 text="👥 Поделиться папкой",
                 callback_data=f"share_folder|{current_folder.id}",
             ),
         )
-    else:
-        builder.row(
-            types.InlineKeyboardButton(
-                text="🔙 Назад", callback_data=f"{fallback_string}"
-            )
-        )
+    builder.row(
+        types.InlineKeyboardButton(text="🔙 Назад", callback_data=f"{fallback_string}")
+    )
     return builder.as_markup(resize_keyboard=True)
