@@ -19,6 +19,7 @@ async def get(
     files: List[Files],
     current_folder: Folders,
     fallback_string: str,
+    organization_id: int,
 ) -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
@@ -33,7 +34,7 @@ async def get(
         builder.row(
             types.InlineKeyboardButton(
                 text=f"📑 {file.name}",
-                callback_data=f"organizations_file_menu|{file.id}",
+                callback_data=f"organizations_file_menu|{file.id}|{organization_id}",
             )
         )
 
