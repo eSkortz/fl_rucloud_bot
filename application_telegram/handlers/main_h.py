@@ -19,3 +19,8 @@ async def sth_error(message: Message, error_text: str) -> None:
 async def main_menu(callback: CallbackQuery) -> None:
     await callback.message.delete()
     await start_command(callback.message)
+
+
+@router.callback_query(F.data == "delete_message")
+async def main_menu(callback: CallbackQuery) -> None:
+    await callback.message.delete()

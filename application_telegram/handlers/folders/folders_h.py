@@ -10,9 +10,11 @@ from config import database_engine_async, TELEGRAM_TOKEN
 from keyboards import delete_message_k
 
 from database.oop.database_worker_async import DatabaseWorkerAsync
+from database.orm.public_users_model import Users
 from database.orm.public_folders_model import Folders
 from database.orm.public_m2m_users_folders_model import M2M_UsersFolders
 from database.orm.public_m2m_folders_folders_model import M2M_FoldersFolders
+
 
 router = Router()
 database_worker = DatabaseWorkerAsync(database_engine_async)
@@ -120,7 +122,12 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
     state_data = await state.get_data()
     id_to_delete = int(state_data["id_to_delete"])
     parent_folder_id = state_data["parent_folder_id"]
-    user_id = state_data["user_id"]
+
+    user: Users = await database_worker.custom_orm_select(
+        cls_from=Users,
+        where_params=[Users.telegram_id == message.chat.id],
+        get_unpacked=True,
+    )
 
     data_to_insert = {"name": name}
     await database_worker.custom_insert(cls_to=Folders, data=[data_to_insert])
@@ -141,7 +148,7 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
     )
 
     data_to_insert = {
-        "user_id": user_id,
+        "user_id": user.id,
         "folder_id": inserted_folder.id,
     }
     await database_worker.custom_insert(cls_to=M2M_UsersFolders, data=[data_to_insert])

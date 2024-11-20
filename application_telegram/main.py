@@ -23,7 +23,7 @@ scheduler = AsyncIOScheduler()
 
 
 async def main() -> None:
-    scheduler.add_job(auto_check_expires, trigger="cron", hour=7, minute=0)
+    scheduler.add_job(auto_check_expires, trigger="interval", minutes=60)
     dp.include_routers(
         commands_h.router,
         main_h.router,

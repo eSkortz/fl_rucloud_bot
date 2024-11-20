@@ -1,8 +1,5 @@
-*temp_files
 __pycache__/
 .vscode/
 .DS_Store
-temp/.env
 alembic.ini
-temp/
 test.py

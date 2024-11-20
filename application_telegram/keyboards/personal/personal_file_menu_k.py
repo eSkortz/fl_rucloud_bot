@@ -9,10 +9,8 @@ def get(file: Files, fallback_string: str) -> ReplyKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         types.InlineKeyboardButton(
-            text="🗳 Загрузить файл", callback_data=f"download_file|{file.id}"
+            text="🗳 Скачать файл", callback_data=f"download_file|{file.id}"
         ),
-    )
-    builder.row(
         types.InlineKeyboardButton(
             text="♻️ Заменить файл", callback_data=f"replace_file|{file.id}"
         ),

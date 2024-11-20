@@ -29,9 +29,9 @@ class FilesGroup(StatesGroup):
 
 @router.callback_query(F.data.startswith("download_file"))
 async def download_file(callback: CallbackQuery) -> None:
-    file_id = callback.data.split("|")[1]
+    file_id = int(callback.data.split("|")[1])
     file: Files = await database_worker.custom_orm_select(
-        cls_from=Files, where_params=[Files.id == file_id]
+        cls_from=Files, where_params=[Files.id == file_id], get_unpacked=True
     )
     file = URLInputFile(f"{S3_URL}/{file.path}")
 
@@ -94,7 +94,7 @@ async def waiting_to_file_replace(message: Message, state: FSMContext) -> None:
     )
 
     s3_worker.delete_file(path=file.path)
-    await s3_worker.create_file(path=file.path, content=file_bytes)
+    s3_worker.create_file(path=file.path, content=file_bytes)
 
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
@@ -125,7 +125,7 @@ async def waiting_to_file_create(message: Message, state: FSMContext) -> None:
     file = await bot.get_file(document.file_id)
     file_path = file.file_path
     buffer = BytesIO()
-    await bot.download(file_path, destination=buffer)
+    await bot.download(file, destination=buffer)
     file_bytes = buffer.getvalue()
 
     sent_message = await message.answer(
@@ -167,7 +167,7 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
     }
     await database_worker.custom_insert(cls_to=M2M_FilesFolders, data=[data_to_insert])
 
-    await s3_worker.create_file(path=file_path, content=file_bytes)
+    s3_worker.create_file(path=file_path, content=file_bytes)
 
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()

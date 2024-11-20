@@ -37,12 +37,17 @@ async def personal_ls(callback: CallbackQuery) -> None:
             where_params=[Folders.id == current_folder_id],
             get_unpacked=True,
         )
-        parent_folder: Folders = await database_worker.custom_orm_select(
+        parent_folder: M2M_FoldersFolders = await database_worker.custom_orm_select(
             cls_from=M2M_FoldersFolders,
             where_params=[M2M_FoldersFolders.child_folder_id == target_folder.id],
             get_unpacked=True,
         )
-        fallback_string = f"personal_ls|{parent_folder.id}"
+        if not parent_folder:
+            fallback_string = "main_menu"
+        else:
+            fallback_string = (
+                f"personal_ls|{parent_folder.parent_folder_id}"
+            )
     else:
         root_folder_id: Folders = await database_worker.custom_orm_select(
             cls_from=M2M_UsersFolders.folder_id,
@@ -60,7 +65,7 @@ async def personal_ls(callback: CallbackQuery) -> None:
         fallback_string = "main_menu"
 
     child_folders_ids: List[int] = await database_worker.custom_orm_select(
-        cls_from=M2M_FoldersFolders,
+        cls_from=M2M_FoldersFolders.child_folder_id,
         where_params=[M2M_FoldersFolders.parent_folder_id == target_folder.id],
     )
     child_folders: List[Folders] = await database_worker.custom_orm_select(
@@ -68,7 +73,7 @@ async def personal_ls(callback: CallbackQuery) -> None:
     )
 
     inner_files_ids: List[int] = await database_worker.custom_orm_select(
-        cls_from=M2M_FilesFolders,
+        cls_from=M2M_FilesFolders.id,
         where_params=[M2M_FilesFolders.folder_id == target_folder.id],
     )
     inner_files: List[Files] = await database_worker.custom_orm_select(
@@ -85,9 +90,8 @@ async def personal_ls(callback: CallbackQuery) -> None:
     await callback.message.delete()
     await callback.message.answer_photo(
         photo=photo,
-        caption=f">📂 {target_folder.name if current_folder_id else 'Main Folder'}",
+        caption=f"📂 {target_folder.name if current_folder_id and parent_folder else 'Main Folder'}",
         reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
@@ -96,7 +100,9 @@ async def personal_file_menu(callback: CallbackQuery) -> None:
     current_file_id: int = int(callback.data.split("|")[1])
 
     current_file: Files = await database_worker.custom_orm_select(
-        cls_from=Files, where_params=[Files.id == current_file_id]
+        cls_from=Files,
+        where_params=[Files.id == current_file_id],
+        get_unpacked=True,
     )
     parent_folder_id: int = await database_worker.custom_orm_select(
         cls_from=M2M_FilesFolders.folder_id,
