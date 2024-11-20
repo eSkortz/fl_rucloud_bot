@@ -14,8 +14,8 @@ class M2M_OrganizationsFolders(Base):
     __tablename__ = "m2m_organizations_folders"
     __table_args__ = (
         UniqueConstraint("organization_id", "folder_id"),
-        ForeignKeyConstraint(["organization_id"], ["organizations.id"]),
-        ForeignKeyConstraint(["folder_id"], ["folders.id"]),
+        ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
+        ForeignKeyConstraint(["folder_id"], ["folders.id"], ondelete="CASCADE"),
     )
     id: Mapped[IntegerPrimaryKey] = mapped_column(
         Sequence("m2m_organizations_folders_id_seq")

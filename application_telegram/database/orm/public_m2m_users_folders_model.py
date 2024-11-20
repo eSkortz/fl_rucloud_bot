@@ -14,8 +14,8 @@ class M2M_UsersFolders(Base):
     __tablename__ = "m2m_users_folders"
     __table_args__ = (
         UniqueConstraint("user_id", "folder_id"),
-        ForeignKeyConstraint(["user_id"], ["users.id"]),
-        ForeignKeyConstraint(["folder_id"], ["folders.id"]),
+        ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        ForeignKeyConstraint(["folder_id"], ["folders.id"], ondelete="CASCADE"),
     )
     id: Mapped[IntegerPrimaryKey] = mapped_column(Sequence("m2m_users_folders_id_seq"))
     user_id: Mapped[IntegerColumn] = mapped_column(index=True, nullable=False)

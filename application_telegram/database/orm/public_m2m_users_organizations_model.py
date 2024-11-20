@@ -13,8 +13,8 @@ class M2M_UsersOrganizations(Base):
     __tablename__ = "m2m_users_organizations"
     __table_args__ = (
         UniqueConstraint("user_id", "organization_id"),
-        ForeignKeyConstraint(["user_id"], ["users.id"]),
-        ForeignKeyConstraint(["organization_id"], ["organizations.id"]),
+        ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="CASCADE"),
     )
     id: Mapped[IntegerPrimaryKey] = mapped_column(
         Sequence("m2m_users_organizations_id_seq")

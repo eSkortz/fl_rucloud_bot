@@ -50,7 +50,11 @@ async def organizations_list(callback: CallbackQuery) -> None:
         where_params=[M2M_UsersOrganizations.user_id == user.id],
     )
     organizations: List[Organizations] = await database_worker.custom_orm_select(
-        cls_from=Organizations, where_params=[Organizations.id.in_(organizations_ids)]
+        cls_from=Organizations,
+        where_params=[
+            Organizations.id.in_(organizations_ids),
+            Organizations.is_deleted == False,
+        ],
     )
 
     markup_inline = organizations_list_k.get(organizations=organizations)
@@ -192,16 +196,18 @@ async def organizations_file_menu(callback: CallbackQuery) -> None:
     )
 
 
-# create_organization
 @router.callback_query(F.data.startswith("create_organization"))
-async def get_name(callback: CallbackQuery, state: FSMContext) -> None:
-    sent_message = await callback.message.answer(text="Введите имя для новой организации")
+async def create_organization(callback: CallbackQuery, state: FSMContext) -> None:
+    sent_message = await callback.message.answer(
+        text="Введите имя для новой организации"
+    )
     await state.set_state(OrganizationsGroup.waiting_to_name)
     await state.update_data(callback=callback)
     await state.update_data(id_to_delete=sent_message.message_id)
 
+
 @router.message(OrganizationsGroup.waiting_to_name)
-async def process_organization_name(message: Message, state: FSMContext):
+async def waiting_to_name(message: Message, state: FSMContext):
     organization_name = message.text
     state_data = await state.get_data()
     id_to_delete = int(state_data["id_to_delete"])
@@ -210,86 +216,73 @@ async def process_organization_name(message: Message, state: FSMContext):
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
 
-    id_deleted = False
     data_to_insert = {
         "user_id": message.chat.id,
         "name": organization_name,
-        "is_deleted": id_deleted
     }
-
     await database_worker.custom_insert(cls_to=Organizations, data=[data_to_insert])
 
-    sent_message = await callback.message.answer(text="Введите никнеймы пользователей, которых вы желаете добавить")
+    await organizations_list(callback=callback)
+
+
+@router.callback_query(F.data.startswith("share_organization"))
+async def share_organization(callback: CallbackQuery, state: FSMContext) -> None:
+    organization_id: int = int(callback.data.split("|")[1])
+    sent_message = await callback.message.answer(text="Введите id сотрудника")
     await state.set_state(OrganizationsGroup.waiting_to_user_id)
     await state.update_data(callback=callback)
     await state.update_data(id_to_delete=sent_message.message_id)
-    await state.update_data(organization_name=organization_name)
+    await state.update_data(organization_id=organization_id)
+
 
 @router.message(OrganizationsGroup.waiting_to_user_id)
-async def process_users(message: Message, state: FSMContext):
+async def waiting_to_user_id(message: Message, state: FSMContext):
+    user_id = message.text
     state_data = await state.get_data()
     id_to_delete = int(state_data["id_to_delete"])
     callback = state_data["callback"]
-    organization_name = state_data["organization_name"]
-    users_name = message.text.split(",")
+    organization_id = state_data["organization_id"]
+
+    user: Users = await database_worker.custom_orm_select(
+        cls_from=Users, where_params=[Users.telegram_id == user_id], get_unpacked=True
+    )
+    if user:
+        data_to_insert = {
+            "user_id": user.id,
+            "organization_id": organization_id,
+        }
+        await database_worker.custom_insert(
+            cls_to=M2M_UsersOrganizations, data=[data_to_insert]
+        )
 
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
 
-    organization: Organizations = database_worker.custom_orm_select(
+    callback.data = f"organization_ls|0|{organization_id}"
+    await organizations_ls(callback=callback)
+
+
+@router.callback_query(F.data.startswith("delete_organization"))
+async def delete_organization(callback: CallbackQuery) -> None:
+    organization_id = int(callback.data.split("|")[1])
+    organization: Organizations = await database_worker.custom_orm_select(
         cls_from=Organizations,
-        where_params=[Organizations.name == organization_name],
+        where_params=[Organizations.id == organization_id],
         get_unpacked=True,
     )
 
-    for user in users_name:
-        user_from_db: Users = await database_worker.custom_orm_select(
-            cls_from=Users,
-            where_params=[Users.telegram_id == user],
-            get_unpacked=True,
-        )
-
-        data_to_insert = {
-            "user_id": user_from_db.id,
-            "organization_id": organization.id,
-        }
-
-        await database_worker.custom_insert(cls_to=M2M_UsersOrganizations, data=[data_to_insert])
-
-    markup_inline = only_to_main_k.get()
+    markup_inline = confirm_deliting_organization_k.get(organization=organization)
     await callback.message.answer(
-        text=f"Организация успешно создана",
+        text=f">‼️ Вы уверены что хотите удалить данную организацию?",
         reply_markup=markup_inline,
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
-# share_organization
-@router.callback_query(F.data.startswith("share_organization"))
-async def share_organization(callback: CallbackQuery) -> None:
-    markup_inline = only_to_main_k.get()
-    await callback.message.answer(
-        text=f"Пользователи успешно добавлены",
-        reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
-    )
-
-# delete_organization
-@router.callback_query(F.data.startswith("delete_organization"))
-async def delete_organization(callback: CallbackQuery) -> None:
-    id_to_delete= int(callback.data.split("|")[1])
-
+@router.callback_query(F.data.startswith("ok_delete_organization"))
+async def ok_delete_organization(callback: CallbackQuery) -> None:
+    organization_id = int(callback.data.split("|")[1])
     await database_worker.custom_delete_all(
-        cls_from=Organizations,
-        where_params=[Folders.id == id_to_delete],
+        cls_from=Organizations, where_params=[Organizations.id == organization_id]
     )
-
-    await callback.message.delete()
-
-    markup_inline = only_to_main_k.get()
-    await callback.message.answer(
-        text=f"Организация успешно удалена",
-        reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
-    )
-# ok_delete_organization
+    await organizations_list(callback=callback)
