@@ -2,12 +2,12 @@ from s3fs import S3FileSystem
 from config import S3_URL, S3_PUBLIC_KEY, S3_PRIVATE_KEY
 
 
-class S3Namespace:
+class S3Worker:
     def __init__(self):
         self.s3 = S3FileSystem(
-            key=S3_PUBLIC_KEY.get_secret_value(),
-            secret=S3_PRIVATE_KEY.get_secret_value(),
-            client_kwargs={"endpoint_url": S3_URL.get_secret_value()},
+            key=S3_PUBLIC_KEY,
+            secret=S3_PRIVATE_KEY,
+            client_kwargs={"endpoint_url": S3_URL},
         )
 
     def create_file(self, path: str, content: str) -> None:

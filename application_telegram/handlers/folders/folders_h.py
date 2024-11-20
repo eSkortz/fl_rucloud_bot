@@ -38,7 +38,6 @@ async def delete_folder(callback: CallbackQuery) -> None:
     await callback.message.answer(
         text=f"✅ Папка успешно удалена",
         reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
@@ -100,7 +99,6 @@ async def waiting_to_expire(message: Message, state: FSMContext) -> None:
     await message.answer(
         text=f"✅ Папка успешно расшарена",
         reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
@@ -155,5 +153,4 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
     await message.answer(
         text=f"✅ Папка успешно создана",
         reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
     )

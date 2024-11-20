@@ -13,7 +13,7 @@ class Files(Base):
     __tablename__ = "files"
     id: Mapped[IntegerPrimaryKey] = mapped_column(Sequence("files_id_seq"))
     name: Mapped[TextColumn] = mapped_column(nullable=False)
-    file_link: Mapped[TextColumn] = mapped_column(nullable=False)
+    path: Mapped[TextColumn] = mapped_column(nullable=False)
     created_at: Mapped[TimestampWTColumn] = mapped_column(
         nullable=True, default=func.now()
     )
