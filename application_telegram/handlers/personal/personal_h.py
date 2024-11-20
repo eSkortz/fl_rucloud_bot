@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.enums.parse_mode import ParseMode
 
 from typing import List
@@ -81,9 +81,11 @@ async def personal_ls(callback: CallbackQuery) -> None:
         current_folder=target_folder,
         fallback_string=fallback_string,
     )
+    photo = FSInputFile("src/personal.png")
     await callback.message.delete()
-    await callback.message.answer(
-        text=f">📂 {target_folder.name if current_folder_id else 'Main Folder'}",
+    await callback.message.answer_photo(
+        photo=photo,
+        caption=f">📂 {target_folder.name if current_folder_id else 'Main Folder'}",
         reply_markup=markup_inline,
         parse_mode=ParseMode.MARKDOWN_V2,
     )

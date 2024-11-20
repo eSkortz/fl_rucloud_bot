@@ -1,5 +1,5 @@
 from aiogram import Router, F, Bot
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, FSInputFile
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
@@ -59,8 +59,10 @@ async def organizations_list(callback: CallbackQuery) -> None:
 
     markup_inline = organizations_list_k.get(organizations=organizations)
     await callback.message.delete()
-    await callback.message.answer(
-        text=f">🏣 Список всех доступных организаций",
+    photo = FSInputFile("src/organizations.png")
+    await callback.message.answer_photo(
+        photo=photo,
+        caption=f">🏣 Список всех доступных организаций",
         reply_markup=markup_inline,
         parse_mode=ParseMode.MARKDOWN_V2,
     )

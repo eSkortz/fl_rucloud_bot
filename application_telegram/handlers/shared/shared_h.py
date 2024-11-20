@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.enums.parse_mode import ParseMode
 
 from typing import List
@@ -67,8 +67,10 @@ async def shared_ls(callback: CallbackQuery) -> None:
         folders=inner_folders, fallback_string=fallback_string
     )
     await callback.message.delete()
-    await callback.message.answer(
-        text=f">🌐 {current_folder.name if current_folder_id else 'Shared Folders'}",
+    photo = FSInputFile("src/settings.png")
+    await callback.message.answer_photo(
+        photo=photo,
+        caption=f">🌐 {current_folder.name if current_folder_id else 'Shared Folders'}",
         reply_markup=markup_inline,
         parse_mode=ParseMode.MARKDOWN_V2,
     )

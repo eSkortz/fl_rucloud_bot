@@ -10,9 +10,11 @@ class S3Worker:
             client_kwargs={"endpoint_url": S3_URL},
         )
 
-    def create_file(self, path: str, content: str) -> None:
-        with self.s3.open(path, "w") as f:
-            f.write(content)
+    async def create_file(self, path: str, content: bytes) -> None:
+        if not isinstance(content, bytes):
+            raise TypeError("Content must be of type bytes")
+        async with self.s3.open_async(path, "wb") as file:
+            await file.write(content)
 
     def delete_file(self, path: str) -> None:
         self.s3.rm(path)
