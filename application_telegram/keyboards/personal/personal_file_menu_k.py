@@ -2,13 +2,13 @@ from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types
 
-from config import engine_async
+from config import database_engine_async
 
 from database.oop.database_worker_async import DatabaseWorkerAsync
 from database.orm.public_files_model import Files
 
 
-database_worker = DatabaseWorkerAsync(engine=engine_async)
+database_worker = DatabaseWorkerAsync(engine=database_engine_async)
 
 
 async def get(file: Files, fallback_string: str) -> ReplyKeyboardMarkup:

@@ -5,6 +5,13 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import TELEGRAM_TOKEN
+from handlers.collaboration import collaborations_h, get_qr_h
+from handlers.collaboration.collaborations_h import collaboration_ls
+from handlers.files import files_h
+from handlers.folders import folders_h
+from handlers.organizations import organizations_h
+from handlers.personal import personal_h
+from handlers.shared import shared_h
 
 from schedulers.auto_check_expires import auto_check_expires
 
@@ -22,6 +29,13 @@ async def main() -> None:
     dp.include_routers(
         commands_h.router,
         main_h.router,
+        personal_h.router,
+        files_h.router,
+        folders_h.router,
+        shared_h.router,
+        organizations_h.router,
+        collaborations_h.router,
+        get_qr_h.router,
     )
     await bot.delete_webhook(drop_pending_updates=True)
 

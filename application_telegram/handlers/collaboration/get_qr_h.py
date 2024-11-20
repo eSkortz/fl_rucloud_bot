@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, FSInputFile
 from config import ETHERPAD_URL
 from keyboards import only_to_main_k
 
-router = Router
+router = Router()
 
 @router.callback_query(F.data == "get_qr")
 async def generate_qr_code(callback: CallbackQuery) -> None:
