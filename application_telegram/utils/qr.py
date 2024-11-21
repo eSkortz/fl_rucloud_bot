@@ -14,7 +14,7 @@ def generate_qr(url: str) -> BytesIO:
     )
     qr.add_data(url)
     qr.make()
-    QRimg = qr.make_image(fill_color=(255, 255, 255), back_color=(173, 216, 230))
+    QRimg = qr.make_image(fill_color=(163, 212, 247), back_color=(255, 255, 255))
     pos = ((QRimg.size[0] - logo.size[0]) // 2, (QRimg.size[1] - logo.size[1]) // 2)
     QRimg.paste(logo, pos)
     img_byte_io = BytesIO()

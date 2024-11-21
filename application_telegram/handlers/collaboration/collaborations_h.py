@@ -33,7 +33,7 @@ class CollaborationsGroup(StatesGroup):
 
 
 @router.callback_query(F.data == "collaborations_ls")
-async def collaboration_ls(callback: CallbackQuery) -> None:
+async def collaborations_ls(callback: CallbackQuery) -> None:
     user: Users = await database_worker.custom_orm_select(
         cls_from=Users,
         where_params=[Users.telegram_id == callback.message.chat.id],
@@ -67,7 +67,7 @@ async def collaboration_menu(callback: CallbackQuery) -> None:
     markup_inline = collaboration_menu_k.get(collaboration=collaboration)
     await callback.message.delete()
     await callback.message.answer(
-        text=f">🌐 {collaboration.name}",
+        text=f">🌐 {collaboration.name}\n\n>```{ETHERPAD_URL}/p/{collaboration.uuid_name}```",
         reply_markup=markup_inline,
         parse_mode=ParseMode.MARKDOWN_V2,
     )
@@ -83,8 +83,8 @@ async def get_qr(callback: CallbackQuery) -> None:
         get_unpacked=True,
     )
 
-    qr_result = generate_qr(url=f"http://{ETHERPAD_URL}/p/{collaboration.uuid_name}")
-    photo = BufferedInputFile(qr_result.get_value())
+    qr_result = generate_qr(url=f"{ETHERPAD_URL}/p/{collaboration.uuid_name}")
+    photo = BufferedInputFile(file=qr_result.read(), filename="qr.png")
 
     markup_inline = delete_message_k.get()
     await callback.message.answer_photo(
@@ -121,7 +121,7 @@ async def ok_delete_collaboration(callback: CallbackQuery) -> None:
     await database_worker.custom_delete_all(
         cls_from=Collaborations, where_params=[Collaborations.id == collaboration_id]
     )
-    await collaboration_ls(callback=callback)
+    await collaborations_ls(callback=callback)
 
 
 @router.callback_query(F.data.startswith("create_collaboration"))
@@ -153,7 +153,7 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
     await NotepadNamespace.create_page(name=uuid_name)
 
     data_to_insert = {
-        "user": user.id,
+        "user_id": user.id,
         "name": collaboration_name,
         "uuid_name": uuid_name,
     }
@@ -161,4 +161,4 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
 
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
-    await collaboration_menu(callback=callback)
+    await collaborations_ls(callback=callback)
