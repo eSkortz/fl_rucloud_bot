@@ -220,8 +220,8 @@ async def waiting_to_name(message: Message, state: FSMContext):
 
     user: Users = await database_worker.custom_orm_select(
         cls_from=Users,
-        where_params=[Users.telegram_id==message.chat.id],
-        get_unpacked=True
+        where_params=[Users.telegram_id == message.chat.id],
+        get_unpacked=True,
     )
 
     data_to_insert = {
@@ -233,40 +233,37 @@ async def waiting_to_name(message: Message, state: FSMContext):
     organization: Organizations = await database_worker.custom_orm_select(
         cls_from=Organizations,
         where_params=[Organizations.name == organization_name],
-        get_unpacked=True
+        order_by=[Organizations.created_at.desc()],
+        sql_limit=1,
+        get_unpacked=True,
     )
 
-    print("")
+    data_to_insert = {"user_id": user.id, "organization_id": organization.id}
+    await database_worker.custom_insert(
+        cls_to=M2M_UsersOrganizations, data=[data_to_insert]
+    )
 
-    data_to_insert2 = {
-        "user_id" : user.id,
-        "organization_id" : organization.id
+    data_to_insert = {
+        "name": str(uuid.uuid4()),
     }
-
-    await database_worker.custom_insert(cls_to=M2M_UsersOrganizations, data=[data_to_insert2])
-
-    data_to_insert3 = {
-        "name": organization_name,
-    }
-
-    await database_worker.custom_insert(cls_to=Folders, data=[data_to_insert3])
+    await database_worker.custom_insert(cls_to=Folders, data=[data_to_insert])
 
     folder: Folders = await database_worker.custom_orm_select(
         ls_from=Folders,
         where_params=[Folders.name == organization_name],
         order_by=[Folders.created_at.desc()],
         sql_limit=1,
-        get_unpacked=True,                                                          
+        get_unpacked=True,
     )
 
-
-    data_to_insert4 = {
+    data_to_insert = {
         "organization_id": organization.id,
         "folder_id": folder.id,
         "is_root": True,
     }
-
-    await database_worker.custom_insert(cls_to=M2M_OrganizationsFolders, data=[data_to_insert4])
+    await database_worker.custom_insert(
+        cls_to=M2M_OrganizationsFolders, data=[data_to_insert]
+    )
 
     await organizations_list(callback=callback)
 
