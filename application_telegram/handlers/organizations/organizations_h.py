@@ -218,11 +218,32 @@ async def waiting_to_name(message: Message, state: FSMContext):
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
 
+    user: Users = await database_worker.custom_orm_select(
+        cls_from=Users,
+        where_params=[Users.telegram_id==message.chat.id],
+        get_unpacked=True
+    )
+
     data_to_insert = {
-        "user_id": message.chat.id,
+        "user_id": user.id,
         "name": organization_name,
     }
     await database_worker.custom_insert(cls_to=Organizations, data=[data_to_insert])
+
+    organization: Organizations = await database_worker.custom_orm_select(
+        cls_from=Organizations,
+        where_params=[Organizations.name == organization_name],
+        get_unpacked=True
+    )
+
+    print("")
+
+    data_to_insert2 = {
+        "user_id" : user.id,
+        "organization_id" : organization.id
+    }
+
+    await database_worker.custom_insert(cls_to=M2M_UsersOrganizations, data=[data_to_insert2])
 
     await organizations_list(callback=callback)
 

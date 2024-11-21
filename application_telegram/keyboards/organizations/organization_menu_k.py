@@ -11,7 +11,7 @@ def get(organization: Organizations, is_owner: bool) -> ReplyKeyboardMarkup:
     builder.row(
         types.InlineKeyboardButton(
             text=f"📂 Файлы организации",
-            callback_data=f"organization_ls|0|{organization.id}",
+            callback_data=f"organizations_ls|0|{organization.id}",
         ),
     )
 
