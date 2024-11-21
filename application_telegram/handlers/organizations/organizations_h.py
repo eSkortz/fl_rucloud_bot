@@ -245,6 +245,29 @@ async def waiting_to_name(message: Message, state: FSMContext):
 
     await database_worker.custom_insert(cls_to=M2M_UsersOrganizations, data=[data_to_insert2])
 
+    data_to_insert3 = {
+        "name": organization_name,
+    }
+
+    await database_worker.custom_insert(cls_to=Folders, data=[data_to_insert3])
+
+    folder: Folders = await database_worker.custom_orm_select(
+        ls_from=Folders,
+        where_params=[Folders.name == organization_name],
+        order_by=[Folders.created_at.desc()],
+        sql_limit=1,
+        get_unpacked=True,                                                          
+    )
+
+
+    data_to_insert4 = {
+        "organization_id": organization.id,
+        "folder_id": folder.id,
+        "is_root": True,
+    }
+
+    await database_worker.custom_insert(cls_to=M2M_OrganizationsFolders, data=[data_to_insert4])
+
     await organizations_list(callback=callback)
 
 
