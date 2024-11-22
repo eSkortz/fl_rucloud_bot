@@ -33,12 +33,15 @@ async def download_file(callback: CallbackQuery) -> None:
     file: Files = await database_worker.custom_orm_select(
         cls_from=Files, where_params=[Files.id == file_id], get_unpacked=True
     )
-    file = URLInputFile(f"{S3_URL}/{file.path}")
+    file = URLInputFile(
+        f"{S3_URL}/rucloud/{file.path}",
+        filename=f"{file.name}.{file.path.split('.')[-1]}",
+    )
 
     markup_inline = delete_message_k.get()
     await callback.message.answer_document(
         document=file,
-        caption=f"✅ Файл успешно удален",
+        caption=f"✅ Файл скачан",
         reply_markup=markup_inline,
     )
 
@@ -80,9 +83,8 @@ async def waiting_to_file_replace(message: Message, state: FSMContext) -> None:
     document = message.document
 
     file = await bot.get_file(document.file_id)
-    file_path = file.file_path
     buffer = BytesIO()
-    await bot.download(file_path, destination=buffer)
+    await bot.download(file, destination=buffer)
     file_bytes = buffer.getvalue()
 
     state_data = await state.get_data()
@@ -90,7 +92,7 @@ async def waiting_to_file_replace(message: Message, state: FSMContext) -> None:
     file_id = state_data["file_id"]
 
     file: Files = await database_worker.custom_orm_select(
-        cls_from=Files, where_params=[Files.id == file_id]
+        cls_from=Files, where_params=[Files.id == file_id], get_unpacked=True
     )
 
     s3_worker.delete_file(path=file.path)
@@ -123,10 +125,10 @@ async def waiting_to_file_create(message: Message, state: FSMContext) -> None:
     document = message.document
 
     file = await bot.get_file(document.file_id)
-    file_path = file.file_path
     buffer = BytesIO()
     await bot.download(file, destination=buffer)
     file_bytes = buffer.getvalue()
+    file_extension = file.file_path.split(".")[-1]
 
     sent_message = await message.answer(
         text="Напишите название для нового файла",
@@ -139,6 +141,7 @@ async def waiting_to_file_create(message: Message, state: FSMContext) -> None:
 
     await state.set_state(FilesGroup.waiting_to_name)
     await state.update_data(file_bytes=file_bytes)
+    await state.update_data(file_extension=file_extension)
     await state.update_data(id_to_delete=sent_message.message_id)
 
 
@@ -150,16 +153,19 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
     id_to_delete = int(state_data["id_to_delete"])
     folder_id = state_data["folder_id"]
     file_bytes = state_data["file_bytes"]
+    file_extension = state_data["file_extension"]
 
     file_path = str(uuid.uuid4())
 
     data_to_insert = {
         "name": name,
-        "path": file_path,
+        "path": f"{file_path}.{file_extension}",
     }
     await database_worker.custom_insert(cls_to=Files, data=[data_to_insert])
     inserted_file: Files = await database_worker.custom_orm_select(
-        cls_from=Files, where_params=[Files.path == file_path], get_unpacked=True
+        cls_from=Files,
+        where_params=[Files.path == f"{file_path}.{file_extension}"],
+        get_unpacked=True,
     )
     data_to_insert = {
         "file_id": inserted_file.id,
@@ -167,7 +173,7 @@ async def waiting_to_name(message: Message, state: FSMContext) -> None:
     }
     await database_worker.custom_insert(cls_to=M2M_FilesFolders, data=[data_to_insert])
 
-    s3_worker.create_file(path=file_path, content=file_bytes)
+    s3_worker.create_file(path=inserted_file.path, content=file_bytes)
 
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()

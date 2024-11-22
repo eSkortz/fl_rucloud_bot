@@ -73,7 +73,7 @@ async def personal_ls(callback: CallbackQuery) -> None:
     )
 
     inner_files_ids: List[int] = await database_worker.custom_orm_select(
-        cls_from=M2M_FilesFolders.id,
+        cls_from=M2M_FilesFolders.file_id,
         where_params=[M2M_FilesFolders.folder_id == target_folder.id],
     )
     inner_files: List[Files] = await database_worker.custom_orm_select(

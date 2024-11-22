@@ -47,30 +47,22 @@ async def shared_ls(callback: CallbackQuery) -> None:
                 ],
             )
         )
+
+        inner_folders_ids: List[int] = await database_worker.custom_orm_select(
+            cls_from=M2M_FoldersFolders.child_folder_id,
+            where_params=[M2M_FoldersFolders.parent_folder_id == current_folder.id],
+        )
+        inner_folders: List[Folders] = await database_worker.custom_orm_select(
+            cls_from=Folders, where_params=[Folders.id.in_(inner_folders_ids)]
+        )
+
         if current_folder_for_user:
-            shared_folders_ids: List[int] = await database_worker.custom_orm_select(
-                cls_from=M2M_UsersFolders.folder_id,
-                where_params=[
-                    M2M_UsersFolders.user_id == user.id,
-                    M2M_UsersFolders.expired_at != None,
-                ],
-            )
-            inner_folders: List[Folders] = await database_worker.custom_orm_select(
-                cls_from=Folders, where_params=[Folders.id.in_(shared_folders_ids)]
-            )
-            fallback_string = "main_menu"
+            fallback_string = f"shared_ls|0"
         else:
             parent_folder: M2M_FoldersFolders = await database_worker.custom_orm_select(
                 cls_from=M2M_FoldersFolders,
                 where_params=[M2M_FoldersFolders.child_folder_id == current_folder.id],
                 get_unpacked=True,
-            )
-            inner_folders_ids: List[int] = await database_worker.custom_orm_select(
-                cls_from=M2M_FoldersFolders.child_folder_id,
-                where_params=[M2M_FoldersFolders.parent_folder_id == current_folder.id],
-            )
-            inner_folders: List[Folders] = await database_worker.custom_orm_select(
-                cls_from=Folders, where_params=[Folders.id.in_(inner_folders_ids)]
             )
             fallback_string = f"shared_ls|{parent_folder.parent_folder_id}"
     else:

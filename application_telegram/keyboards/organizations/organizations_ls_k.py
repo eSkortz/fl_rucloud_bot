@@ -20,7 +20,8 @@ def get(
     for folder in folders:
         builder.row(
             types.InlineKeyboardButton(
-                text=f"📂 {folder.name}", callback_data=f"organizations_ls|{folder.id}"
+                text=f"📂 {folder.name}",
+                callback_data=f"organizations_ls|{folder.id}|{organization_id}",
             )
         )
 

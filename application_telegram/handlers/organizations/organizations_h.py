@@ -117,9 +117,12 @@ async def organizations_ls(callback: CallbackQuery) -> None:
             where_params=[M2M_FoldersFolders.child_folder_id == current_folder.id],
             get_unpacked=True,
         )
-        fallback_string = (
-            f"organizations_ls|{parent_folder.id}|{current_organization_id}"
-        )
+        if not parent_folder:
+            fallback_string = f"organization_menu|{current_organization_id}"
+        else:
+            fallback_string = (
+                f"organizations_ls|{parent_folder.id}|{current_organization_id}"
+            )
     else:
         root_folder_id: Folders = await database_worker.custom_orm_select(
             cls_from=M2M_OrganizationsFolders.folder_id,
@@ -134,10 +137,10 @@ async def organizations_ls(callback: CallbackQuery) -> None:
             where_params=[Folders.id == root_folder_id],
             get_unpacked=True,
         )
-        fallback_string = "organizations_list"
+        fallback_string = f"organization_menu|{current_organization_id}"
 
     child_folders_ids: List[int] = await database_worker.custom_orm_select(
-        cls_from=M2M_FoldersFolders,
+        cls_from=M2M_FoldersFolders.child_folder_id,
         where_params=[M2M_FoldersFolders.parent_folder_id == current_folder.id],
     )
     child_folders: List[Folders] = await database_worker.custom_orm_select(
@@ -145,7 +148,7 @@ async def organizations_ls(callback: CallbackQuery) -> None:
     )
 
     inner_files_ids: List[int] = await database_worker.custom_orm_select(
-        cls_from=M2M_FilesFolders,
+        cls_from=M2M_FilesFolders.file_id,
         where_params=[M2M_FilesFolders.folder_id == current_folder.id],
     )
     inner_files: List[Files] = await database_worker.custom_orm_select(
@@ -161,9 +164,8 @@ async def organizations_ls(callback: CallbackQuery) -> None:
     )
     await callback.message.delete()
     await callback.message.answer(
-        text=f">🏣 {current_organization.name} | {current_folder.name if current_folder_id else 'Main Folder'}",
+        text=f"🏣 {current_organization.name} | {current_folder.name if current_folder_id and parent_folder else 'Main Folder'}",
         reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
@@ -303,8 +305,7 @@ async def waiting_to_user_id(message: Message, state: FSMContext):
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
 
-    callback.data = f"organizations_ls|0|{organization_id}"
-    await organizations_ls(callback=callback)
+    await organizations_list(callback=callback)
 
 
 @router.callback_query(F.data.startswith("delete_organization"))
