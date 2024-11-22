@@ -243,14 +243,16 @@ async def waiting_to_name(message: Message, state: FSMContext):
         cls_to=M2M_UsersOrganizations, data=[data_to_insert]
     )
 
+    random_name = str(uuid.uuid4())
+
     data_to_insert = {
-        "name": str(uuid.uuid4()),
+        "name": random_name,
     }
     await database_worker.custom_insert(cls_to=Folders, data=[data_to_insert])
 
     folder: Folders = await database_worker.custom_orm_select(
-        ls_from=Folders,
-        where_params=[Folders.name == organization_name],
+        cls_from=Folders,
+        where_params=[Folders.name == random_name],
         order_by=[Folders.created_at.desc()],
         sql_limit=1,
         get_unpacked=True,
@@ -280,7 +282,7 @@ async def share_organization(callback: CallbackQuery, state: FSMContext) -> None
 
 @router.message(OrganizationsGroup.waiting_to_user_id)
 async def waiting_to_user_id(message: Message, state: FSMContext):
-    user_id = message.text
+    user_id = int(message.text)
     state_data = await state.get_data()
     id_to_delete = int(state_data["id_to_delete"])
     callback = state_data["callback"]
@@ -301,7 +303,7 @@ async def waiting_to_user_id(message: Message, state: FSMContext):
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
 
-    callback.data = f"organization_ls|0|{organization_id}"
+    callback.data = f"organizations_ls|0|{organization_id}"
     await organizations_ls(callback=callback)
 
 

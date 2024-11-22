@@ -64,12 +64,15 @@ async def waiting_to_user_id(message: Message, state: FSMContext) -> None:
 
     state_data = await state.get_data()
     id_to_delete = int(state_data["id_to_delete"])
+    folder_id = int(state_data["folder_id"])
+
     await bot.delete_message(chat_id=message.chat.id, message_id=id_to_delete)
     await message.delete()
 
     await state.set_state(FoldersGroup.waiting_to_expire)
     await state.update_data(user_id=user_id)
     await state.update_data(id_to_delete=sent_message.message_id)
+    await state.update_data(folder_id=folder_id)
 
 
 @router.message(FoldersGroup.waiting_to_expire)
@@ -86,8 +89,14 @@ async def waiting_to_expire(message: Message, state: FSMContext) -> None:
     folder_id = state_data["folder_id"]
     user_id = state_data["user_id"]
 
+    user: Users = await database_worker.custom_orm_select(
+        cls_from=Users,
+        where_params=[Users.telegram_id == user_id],
+        get_unpacked=True,
+    )
+
     data_to_insert = {
-        "user_id": user_id,
+        "user_id": user.id,
         "folder_id": folder_id,
         "is_owner": False,
         "expired_at": expired_at,

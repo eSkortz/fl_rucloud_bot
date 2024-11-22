@@ -21,7 +21,7 @@ router = Router()
 database_worker = DatabaseWorkerAsync(database_engine_async)
 
 
-@router.callback_query(F.data.startswith("shared_ls|0"))
+@router.callback_query(F.data.startswith("shared_ls"))
 async def shared_ls(callback: CallbackQuery) -> None:
     current_folder_id: int = int(callback.data.split("|")[1])
 
@@ -58,10 +58,17 @@ async def shared_ls(callback: CallbackQuery) -> None:
                 M2M_UsersFolders.expired_at != None,
             ],
         )
-        inner_folders: List[Folders] = await database_worker.custom_orm_select(
-            cls_from=Folders, where_params=[Folders.id.in_(shared_folders_ids)]
+        shared_folder: M2M_UsersFolders = await database_worker.custom_orm_select(
+            cls_from=M2M_UsersFolders,
+            where_params=[M2M_UsersFolders.user_id==user.id],
+            order_by=[M2M_UsersFolders.created_at.desc()],
+            sql_limit=1,
+            get_unpacked=True,
         )
-        fallback_string = "main_menu"
+        inner_folders: List[Folders] = await database_worker.custom_orm_select(
+            cls_from=Folders, where_params=[Folders.id == shared_folder.folder_id]
+        )
+        fallback_string = "main_menu|"
 
     markup_inline = shared_ls_k.get(
         folders=inner_folders, fallback_string=fallback_string
