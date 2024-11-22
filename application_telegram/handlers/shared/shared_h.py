@@ -54,21 +54,21 @@ async def shared_ls(callback: CallbackQuery) -> None:
         shared_folders_ids: List[int] = await database_worker.custom_orm_select(
             cls_from=M2M_UsersFolders,
             where_params=[
-                M2M_UsersFolders.user_id == user.id,
+                M2M_UsersFolders.user_id == user.telegram_id,
                 M2M_UsersFolders.expired_at != None,
             ],
         )
-        shared_folder: M2M_UsersFolders = await database_worker.custom_orm_select(
-            cls_from=M2M_UsersFolders,
-            where_params=[M2M_UsersFolders.user_id==user.id],
-            order_by=[M2M_UsersFolders.created_at.desc()],
-            sql_limit=1,
-            get_unpacked=True,
-        )
+        # shared_folder: M2M_UsersFolders = await database_worker.custom_orm_select(
+        #     cls_from=M2M_UsersFolders,
+        #     where_params=[M2M_UsersFolders.user_id==user.id],
+        #     order_by=[M2M_UsersFolders.created_at.desc()],
+        #     sql_limit=1,
+        #     get_unpacked=True,
+        # )
         inner_folders: List[Folders] = await database_worker.custom_orm_select(
-            cls_from=Folders, where_params=[Folders.id == shared_folder.folder_id]
+            cls_from=Folders, where_params=[Folders.id.in_(shared_folders_ids)]
         )
-        fallback_string = "main_menu|"
+        fallback_string = "main_menu"
 
     markup_inline = shared_ls_k.get(
         folders=inner_folders, fallback_string=fallback_string
@@ -77,9 +77,8 @@ async def shared_ls(callback: CallbackQuery) -> None:
     photo = FSInputFile("src/settings.png")
     await callback.message.answer_photo(
         photo=photo,
-        caption=f">🌐 {current_folder.name if current_folder_id else 'Shared Folders'}",
+        caption=f"🌐 {current_folder.name if current_folder_id else 'Shared Folders'}",
         reply_markup=markup_inline,
-        parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
